@@ -19,8 +19,8 @@ KnowLedger is a semantic Q&A assistant powered by MindsDB’s Knowledge Bases (K
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/<your-repo>/knowledger.git
-cd knowledger
+git clone https://github.com/<your-repo>/knowLedger.git
+cd knowLedger
 yarn install
 ```
 
