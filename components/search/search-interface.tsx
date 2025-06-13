@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { Search, Filter, LayoutGrid, List } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useDebounce } from '@/hooks/use-debounce';
-import { SearchResults } from './search-results';
-import { SearchFilters } from './search-filters';
+import { useState, useCallback, useEffect } from "react";
+import { Search, Filter, LayoutGrid, List } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useDebounce } from "@/hooks/use-debounce";
+import { SearchResults } from "./search-results";
+import { SearchFilters } from "./search-filters";
+import { queryKnowledgeBase } from "@/lib/mindsdb";
 
 interface SearchQuery {
   text: string;
@@ -19,23 +20,30 @@ interface SearchQuery {
 
 export function SearchInterface() {
   const [query, setQuery] = useState<SearchQuery>({
-    text: '',
+    text: "",
     tags: [],
     difficulty: [],
-    dateRange: 'all'
+    dateRange: "all",
   });
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  
+  const [data, setData] = useState<any>();
+
   const debouncedQuery = useDebounce(query.text, 500);
-  
+
   const handleSearch = useCallback(async (searchQuery: SearchQuery) => {
     if (!searchQuery.text.trim() && searchQuery.tags.length === 0) return;
-    
+
     setIsSearching(true);
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+
+    try {
+      const rows = await queryKnowledgeBase(searchQuery.text);
+      setData(rows);
+    } catch (error) {
+      console.error("MindsDB query error:", error);
+    }
+
     setIsSearching(false);
   }, []);
 
@@ -43,7 +51,13 @@ export function SearchInterface() {
     if (debouncedQuery || query.tags.length > 0) {
       handleSearch(query);
     }
-  }, [debouncedQuery, query.tags, query.difficulty, query.dateRange, handleSearch]);
+  }, [
+    debouncedQuery,
+    query.tags,
+    query.difficulty,
+    query.dateRange,
+    handleSearch,
+  ]);
 
   return (
     <Card>
@@ -61,17 +75,17 @@ export function SearchInterface() {
             </Button>
             <div className="flex rounded-md border">
               <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                variant={viewMode === "grid" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
                 className="rounded-r-none"
               >
                 <LayoutGrid className="h-4 w-4" />
               </Button>
               <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                variant={viewMode === "list" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
                 className="rounded-l-none"
               >
                 <List className="h-4 w-4" />
@@ -86,21 +100,25 @@ export function SearchInterface() {
           <Input
             placeholder="Ask any question or search for topics..."
             value={query.text}
-            onChange={(e) => setQuery(prev => ({ ...prev, text: e.target.value }))}
+            onChange={(e) =>
+              setQuery((prev) => ({ ...prev, text: e.target.value }))
+            }
             className="pl-10 text-base"
           />
         </div>
-        
+
         {query.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {query.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="cursor-pointer">
                 {tag}
                 <button
-                  onClick={() => setQuery(prev => ({
-                    ...prev,
-                    tags: prev.tags.filter(t => t !== tag)
-                  }))}
+                  onClick={() =>
+                    setQuery((prev) => ({
+                      ...prev,
+                      tags: prev.tags.filter((t) => t !== tag),
+                    }))
+                  }
                   className="ml-1 text-xs"
                 >
                   ×
@@ -109,15 +127,13 @@ export function SearchInterface() {
             ))}
           </div>
         )}
-        
+
         {showFilters && (
-          <SearchFilters
-            query={query}
-            onQueryChange={setQuery}
-          />
+          <SearchFilters query={query} onQueryChange={setQuery} />
         )}
-        
+
         <SearchResults
+          data={data}
           query={query}
           viewMode={viewMode}
           isLoading={isSearching}
