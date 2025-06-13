@@ -65,9 +65,8 @@ OPEN_AI_API_KEY=your_openai_key
 ## 📂 Project Structure
 
 ```
-/app
-  /kb
-    mindsdb-setup.ts (all server actions)
+/lib
+  /mindsdb.js (all server actions)
 ```
 
 ---
@@ -76,7 +75,7 @@ OPEN_AI_API_KEY=your_openai_key
 
 ```bash
 yarn dev        # Run dev server
-yarn build      # Static export (⚠️ No server actions support)
+yarn build
 ```
 
 ---
