@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // output: 'export',
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx', 'server.ts'],
   eslint: {
     ignoreDuringBuilds: true,
   },
