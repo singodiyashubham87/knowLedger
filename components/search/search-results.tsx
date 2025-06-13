@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, ThumbsUp, Eye, BookOpen } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Clock, ThumbsUp, Eye, BookOpen } from "lucide-react";
+import { mockResults } from "@/app/data/data";
 
 interface SearchQuery {
   text: string;
@@ -27,74 +28,34 @@ interface SearchResult {
 }
 
 interface SearchResultsProps {
+  data?: any;
   query: SearchQuery;
-  viewMode: 'grid' | 'list';
+  viewMode: "grid" | "list";
   isLoading: boolean;
 }
 
-// Mock data for demonstration
-const mockResults: SearchResult[] = [
-  {
-    id: '1',
-    question: 'How do you implement debounced search in React?',
-    answer: 'To implement debounced search in React, you can create a custom hook that uses setTimeout to delay the search execution...',
-    tags: ['React', 'JavaScript', 'Hooks'],
-    difficulty: 'Intermediate',
-    views: 245,
-    likes: 18,
-    createdAt: '2024-01-15',
-    relevanceScore: 0.95
-  },
-  {
-    id: '2',
-    question: 'What is the difference between useState and useReducer?',
-    answer: 'useState is perfect for simple state management, while useReducer is better for complex state logic...',
-    tags: ['React', 'Hooks', 'State Management'],
-    difficulty: 'Beginner',
-    views: 189,
-    likes: 24,
-    createdAt: '2024-01-14',
-    relevanceScore: 0.88
-  },
-  {
-    id: '3',
-    question: 'How to optimize Next.js app performance?',
-    answer: 'Next.js performance optimization involves several strategies including code splitting, image optimization...',
-    tags: ['Next.js', 'Performance', 'Optimization'],
-    difficulty: 'Advanced',
-    views: 302,
-    likes: 31,
-    createdAt: '2024-01-13',
-    relevanceScore: 0.91
-  }
-];
-
-export function SearchResults({ query, viewMode, isLoading }: SearchResultsProps) {
-  const [results, setResults] = useState<SearchResult[]>([]);
+export function SearchResults({
+  data,
+  query,
+  viewMode,
+  isLoading,
+}: SearchResultsProps) {
+  const [results, setResults] = useState<SearchResult[]>(data ?? mockResults ?? []);
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
-
-  useEffect(() => {
-    // Simulate API call
-    if (query.text || query.tags.length > 0) {
-      setResults(mockResults);
-    } else {
-      setResults([]);
-    }
-  }, [query]);
 
   useEffect(() => {
     let filtered = results;
 
     // Filter by tags
     if (query.tags.length > 0) {
-      filtered = filtered.filter(result =>
-        query.tags.some(tag => result.tags.includes(tag))
+      filtered = filtered.filter((result) =>
+        query.tags.some((tag) => result.tags.includes(tag))
       );
     }
 
     // Filter by difficulty
     if (query.difficulty.length > 0) {
-      filtered = filtered.filter(result =>
+      filtered = filtered.filter((result) =>
         query.difficulty.includes(result.difficulty)
       );
     }
@@ -159,7 +120,11 @@ export function SearchResults({ query, viewMode, isLoading }: SearchResultsProps
         </p>
       </div>
 
-      <div className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2' : 'space-y-4'}>
+      <div
+        className={
+          viewMode === "grid" ? "grid gap-4 md:grid-cols-2" : "space-y-4"
+        }
+      >
         {filteredResults.map((result) => (
           <Card key={result.id} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
@@ -176,24 +141,27 @@ export function SearchResults({ query, viewMode, isLoading }: SearchResultsProps
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {result.answer}
               </p>
-              
+
               <div className="flex flex-wrap gap-2">
                 {result.tags.map((tag) => (
                   <Badge key={tag} variant="secondary" className="text-xs">
                     {tag}
                   </Badge>
                 ))}
-                <Badge 
+                <Badge
                   variant={
-                    result.difficulty === 'Beginner' ? 'default' : 
-                    result.difficulty === 'Intermediate' ? 'secondary' : 'destructive'
-                  } 
+                    result.difficulty === "Beginner"
+                      ? "default"
+                      : result.difficulty === "Intermediate"
+                      ? "secondary"
+                      : "destructive"
+                  }
                   className="text-xs"
                 >
                   {result.difficulty}
                 </Badge>
               </div>
-              
+
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
